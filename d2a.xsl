@@ -866,7 +866,7 @@ ____
 </xsl:if>
 <xsl:call-template name="process-id"/>
 <xsl:text>.</xsl:text><xsl:apply-templates select="title"/>
-image::<xsl:value-of select="mediaobject/imageobject[@role='web']/imagedata/@fileref"/>[]
+image::<xsl:value-of select="mediaobject/imageobject[@role='fo']/imagedata/@fileref"/>[]
 <xsl:choose>
   <xsl:when test="ancestor::listitem and following-sibling::element()"/>
   <xsl:otherwise><xsl:value-of select="util:carriage-returns(1)"/></xsl:otherwise>
@@ -876,11 +876,13 @@ image::<xsl:value-of select="mediaobject/imageobject[@role='web']/imagedata/@fil
 <xsl:template match="informalfigure">
 <xsl:value-of select="util:carriage-returns(1)"/>
 <xsl:call-template name="process-id"/>
-image::<xsl:value-of select="mediaobject/imageobject[@role='web']/imagedata/@fileref"/>[]
+image::<xsl:value-of select="mediaobject/imageobject[@role='fo']/imagedata/@fileref"/>[]
 <xsl:value-of select="util:carriage-returns(1)"/>
 </xsl:template>
 
-<xsl:template match="inlinemediaobject">image:<xsl:value-of select="imageobject[@role='web']/imagedata/@fileref"/>[]</xsl:template>
+<xsl:template match="inlinemediaobject">image:<xsl:value-of select="imageobject[@role='fo']/imagedata/@fileref"/>[]</xsl:template>
+
+<xsl:template match="mediaobject">image:<xsl:value-of select="imageobject[@role='fo']/imagedata/@fileref"/>[]</xsl:template>
 
 <xsl:template match="literallayout">
 ....
@@ -1401,6 +1403,8 @@ pass:[<xsl:copy-of select="."/>]
 <xsl:template match="section">
   <xsl:call-template name="process-id"/>
   <xsl:sequence select="string-join (('&#10;&#10;', for $i in (1 to count (ancestor::section) + 3) return '='),'')"/>
+  <!-- Make sure we have a space after the heading = -->
+  <xsl:text> </xsl:text>
   <xsl:apply-templates select="title"/>
   <xsl:value-of select="util:carriage-returns(2)"/>
   <xsl:apply-templates select="*[not(self::title)]"/>
