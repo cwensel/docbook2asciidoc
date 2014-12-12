@@ -2,6 +2,7 @@
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
  xmlns:xs="http://www.w3.org/2001/XMLSchema"
  xmlns:util="http://github.com/oreillymedia/docbook2asciidoc/"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
  exclude-result-prefixes="util"
  >
 
@@ -736,7 +737,17 @@ ____
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="literal | code"><xsl:if test="preceding-sibling::node()[1][self::replaceable] or following-sibling::node()[1][self::replaceable] or child::replaceable or following-sibling::node()[1][self::emphasis] or preceding-sibling::text()[matches(., '\S$')] or (following-sibling::text()[1][matches(., '^\S.*?') and not(matches(., '^\..*?')) and not(matches(., '^,.*?'))])">+</xsl:if>+<xsl:if test='contains(., "+") or contains(., "&apos;") or contains(., "_")'>$$</xsl:if><xsl:apply-templates/><xsl:if test='contains(., "+") or contains(., "&apos;") or contains(., "_")'>$$</xsl:if>+<xsl:if test="preceding-sibling::node()[1][self::replaceable] or following-sibling::node()[1][self::replaceable] or child::replaceable or following-sibling::node()[1][self::emphasis] or preceding-sibling::text()[matches(., '\S$')] or (following-sibling::text()[1][matches(., '^\S.*?') and not(matches(., '^\..*?')) and not(matches(., '^,.*?'))])">+</xsl:if></xsl:template>
+  <xsl:template match="literal|code|classname|parameter|varname|type|sgmltag|methodname|interfacename|parameter|productname|acronym|application|property|function">
+    <!-- adds original as asciioc role -->
+    <xsl:choose>
+      <xsl:when test="name() != 'literal'">
+        <xsl:text>[</xsl:text>
+        <xsl:value-of select="name()" />
+        <xsl:text>]</xsl:text>
+      </xsl:when>
+    </xsl:choose>
+    <xsl:if test="preceding-sibling::node()[1][self::replaceable] or following-sibling::node()[1][self::replaceable] or child::replaceable or following-sibling::node()[1][self::emphasis] or preceding-sibling::text()[matches(., '\S$')] or (following-sibling::text()[1][matches(., '^\S.*?') and not(matches(., '^\..*?')) and not(matches(., '^,.*?'))])">+</xsl:if>+<xsl:if test='contains(., "+") or contains(., "&apos;") or contains(., "_")'>$$</xsl:if><xsl:apply-templates/><xsl:if test='contains(., "+") or contains(., "&apos;") or contains(., "_")'>$$</xsl:if>+<xsl:if test="preceding-sibling::node()[1][self::replaceable] or following-sibling::node()[1][self::replaceable] or child::replaceable or following-sibling::node()[1][self::emphasis] or preceding-sibling::text()[matches(., '\S$')] or (following-sibling::text()[1][matches(., '^\S.*?') and not(matches(., '^\..*?')) and not(matches(., '^,.*?'))])">+</xsl:if>
+  </xsl:template>
   <xsl:template match="literal/text()"><xsl:value-of select="replace(replace(replace(., '\n\s+', ' ', 'm'), 'C\+\+', '\$\$C++\$\$', 'm'), '([\[\]\*\^~])', '\\$1', 'm')"></xsl:value-of></xsl:template>
 
 <xsl:template match="userinput">**`<xsl:apply-templates />`**</xsl:template>
@@ -965,6 +976,14 @@ pass:[<xsl:copy-of select="."/>]
 
   <xsl:template match="example">
     <xsl:choose>
+
+      <xsl:when test="xi:include">
+        <xsl:call-template name="process-id"/>
+        <xsl:apply-templates select="." mode="title"/>====
+<xsl:call-template name="include-file"/>
+====
+      </xsl:when>
+
       <!-- When example code contains callouts -->
       <xsl:when test="//co">
         <xsl:choose>
@@ -1402,13 +1421,25 @@ pass:[<xsl:copy-of select="."/>]
 
 <xsl:template match="section">
   <xsl:call-template name="process-id"/>
-  <xsl:sequence select="string-join (('&#10;&#10;', for $i in (1 to count (ancestor::section) + 3) return '='),'')"/>
+
+  <xsl:value-of select="util:carriage-returns(2)"/>
+
+  <xsl:if test="title">
+    <xsl:text xml:space="preserve">[[</xsl:text><xsl:value-of select="title/@xml:id"/><xsl:text xml:space="preserve">]]&#10;</xsl:text>
+  </xsl:if>
+
+  <xsl:sequence select="string-join ((for $i in (1 to count (ancestor::section) + 3) return '='),'')"/>
   <!-- Make sure we have a space after the heading = -->
   <xsl:text> </xsl:text>
   <xsl:apply-templates select="title"/>
   <xsl:value-of select="util:carriage-returns(2)"/>
   <xsl:apply-templates select="*[not(self::title)]"/>
 </xsl:template>
+
+<!-- <xsl:template match="title">
+  <xsl:call-template name="process-id"/>
+  <xsl:apply-templates select="node()"/>
+</xsl:template> -->
 
 <!-- Utility functions/templates -->
 <xsl:function name="util:carriage-returns">
@@ -1436,11 +1467,18 @@ pass:[<xsl:copy-of select="."/>]
 </xsl:template>
 
 <xsl:template name="process-id">
-  <xsl:if test="@id">
-    <xsl:text xml:space="preserve">[[</xsl:text>
-    <xsl:value-of select="@id"/>
-    <xsl:text xml:space="preserve">]]&#10;</xsl:text>
-  </xsl:if>
+  <xsl:choose>
+    <xsl:when test="@id">
+      <xsl:text xml:space="preserve">[[</xsl:text>
+      <xsl:value-of select="@id"/>
+      <xsl:text xml:space="preserve">]]&#10;</xsl:text>
+    </xsl:when>
+    <xsl:when test="@xml:id">
+      <xsl:text xml:space="preserve">[[</xsl:text>
+      <xsl:value-of select="@xml:id"/>
+      <xsl:text xml:space="preserve">]]&#10;</xsl:text>
+    </xsl:when>
+  </xsl:choose>
 </xsl:template>
 
 <xsl:template match="*" mode="title">
@@ -1458,5 +1496,13 @@ pass:[<xsl:copy-of select="."/>]
 </xsl:template>
 
 <xsl:template match="indexterm" mode="copy-and-drop-indexterms"/>
+
+<xsl:template name="include-file">
+  <xsl:if test="xi:include">
+    <xsl:text>include::</xsl:text>
+    <xsl:value-of select="xi:include/@href"/>
+    <xsl:text>[]</xsl:text>
+  </xsl:if>
+</xsl:template>
 
 </xsl:stylesheet>
