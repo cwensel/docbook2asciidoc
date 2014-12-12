@@ -9,7 +9,7 @@ fi
 
 DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 
-convert() 
+convert()
 {
   CMD="find $SCAN_DIR -name \*.$EXT"
   if [ $RECURSE == "0" ]; then
@@ -22,8 +22,9 @@ convert()
   for xml in $xmls
   do
     output_filename=${xml/.$EXT/.$OEXT}
-    echo "Processing $xml -> $output_filename"    
-    CMD="java -jar $DIR/saxon9he.jar -s $xml -o $output_filename $DIR/d2a.xsl"
+    output_filename=${OUT_DIR}/`basename $output_filename`
+    echo "Processing $xml -> $output_filename"
+    CMD="java -jar $DIR/saxon9he.jar -s:$xml -o:$output_filename -xsl:$DIR/d2a.xsl chunk-output=true"
     $CMD
   done
 }
