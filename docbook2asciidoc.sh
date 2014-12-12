@@ -40,6 +40,7 @@ OPTIONS:
    -s      Source directory to scan for files, by default the working directory
    -x      Extension of files to convert, by default 'xml'
    -o      Output extension, by default 'asciidoc'
+   -O      Output directory [default:'output']
    -r      Enable recusive scanning, by default the scan is not recursive
    -h      Shows this message
 EOF
@@ -51,7 +52,7 @@ EXT="xml"
 OEXT="asciidoc"
 OUT_DIR="output"
 
-while getopts “hrx:o:s:” OPTION
+while getopts “hrx:o:O:s:” OPTION
 
 do
      case $OPTION in
@@ -70,6 +71,9 @@ do
              ;;
          o)
              OEXT=$OPTARG
+             ;;
+         O)
+             OUT_DIR=$OPTARG
              ;;
          [?])
              usage
