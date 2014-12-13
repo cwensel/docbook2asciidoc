@@ -321,9 +321,9 @@
 
 <xsl:template match="part">
 <xsl:call-template name="process-id"/>
-= <xsl:apply-templates select="title"/>
+= <xsl:apply-templates select="info/title"/>
 <xsl:value-of select="util:carriage-returns(2)"/>
-  <xsl:apply-templates select="*[not(self::title)]"/>
+  <xsl:apply-templates select="*[not(self::info)]"/>
 </xsl:template>
 
 <xsl:template match="partintro">
@@ -337,9 +337,9 @@
 
 <xsl:template match="chapter">
 <xsl:call-template name="process-id"/>
-== <xsl:apply-templates select="title"/>
+== <xsl:apply-templates select="info/title"/>
 <xsl:value-of select="util:carriage-returns(2)"/>
-  <xsl:apply-templates select="*[not(self::title)]"/>
+  <xsl:apply-templates select="*[not(self::info)]"/>
 </xsl:template>
 
 <xsl:template match="appendix">
@@ -847,8 +847,14 @@ ____
 [options="<xsl:value-of select="@spacing"/>"]
 </xsl:if>
 <xsl:for-each select="listitem">
-* <xsl:apply-templates/>
+  <xsl:text>* </xsl:text>
+  <xsl:variable name="item_content">
+    <xsl:apply-templates/>
+  </xsl:variable>
+  <xsl:value-of select="replace($item_content, '^\s*(.+?)\s*$', '$1')"/>
+  <xsl:value-of select="util:carriage-returns(1)"/>
 </xsl:for-each>
+<xsl:value-of select="util:carriage-returns(2)"/>
 </xsl:template>
 
 <xsl:template match="orderedlist">
@@ -857,8 +863,14 @@ ____
 [options="<xsl:value-of select="@spacing"/>"]
 </xsl:if>
 <xsl:for-each select="listitem">
-. <xsl:apply-templates/>
+  <xsl:text>. </xsl:text>
+  <xsl:variable name="item_content">
+    <xsl:apply-templates/>
+  </xsl:variable>
+  <xsl:value-of select="replace($item_content, '^\s*(.+?)\s*$', '$1')"/>
+  <xsl:value-of select="util:carriage-returns(1)"/>
 </xsl:for-each>
+<xsl:value-of select="util:carriage-returns(2)"/>
 </xsl:template>
 
 <xsl:template match="simplelist">
@@ -1424,7 +1436,7 @@ pass:[<xsl:copy-of select="."/>]
 
   <xsl:value-of select="util:carriage-returns(2)"/>
 
-  <xsl:if test="title">
+  <xsl:if test="title/@xml:id">
     <xsl:text xml:space="preserve">[[</xsl:text><xsl:value-of select="title/@xml:id"/><xsl:text xml:space="preserve">]]&#10;</xsl:text>
   </xsl:if>
 
