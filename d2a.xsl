@@ -693,6 +693,10 @@ ____
 <xsl:template match="term"><xsl:apply-templates select="node()"/>:: </xsl:template>
 
 <xsl:template match="listitem">
+  <xsl:if test="xi:include">
+    <xsl:value-of select="util:carriage-returns(1)"/>
+    <xsl:call-template name="include-file"/>
+  </xsl:if>
 <xsl:apply-templates select="node()"/>
 </xsl:template>
 
@@ -889,7 +893,7 @@ ____
 </xsl:if>
 <xsl:call-template name="process-id"/>
 <xsl:text>.</xsl:text><xsl:apply-templates select="title"/>
-image::<xsl:value-of select="mediaobject/imageobject[@role='fo']/imagedata/@fileref"/>[]
+image::<xsl:value-of select="mediaobject/imageobject[@role='fo']/imagedata/@fileref"/>[align="center"]
 <xsl:choose>
   <xsl:when test="ancestor::listitem and following-sibling::element()"/>
   <xsl:otherwise><xsl:value-of select="util:carriage-returns(1)"/></xsl:otherwise>
@@ -899,13 +903,12 @@ image::<xsl:value-of select="mediaobject/imageobject[@role='fo']/imagedata/@file
 <xsl:template match="informalfigure">
 <xsl:value-of select="util:carriage-returns(1)"/>
 <xsl:call-template name="process-id"/>
-image::<xsl:value-of select="mediaobject/imageobject[@role='fo']/imagedata/@fileref"/>[]
+image::<xsl:value-of select="mediaobject/imageobject[@role='fo']/imagedata/@fileref"/>[align="center"]
 <xsl:value-of select="util:carriage-returns(1)"/>
 </xsl:template>
 
-<xsl:template match="inlinemediaobject">image:<xsl:value-of select="imageobject[@role='fo']/imagedata/@fileref"/>[]</xsl:template>
-
-<xsl:template match="mediaobject">image:<xsl:value-of select="imageobject[@role='fo']/imagedata/@fileref"/>[]</xsl:template>
+<!-- we seem to be abusing inlinemediaobject -->
+<xsl:template match="mediaobject|inlinemediaobject">image:<xsl:value-of select="imageobject[@role='fo']/imagedata/@fileref"/>[align="center"]<xsl:value-of select="util:carriage-returns(2)"/></xsl:template>
 
 <xsl:template match="literallayout">
 ....
@@ -994,7 +997,8 @@ pass:[<xsl:copy-of select="."/>]
         <xsl:apply-templates select="." mode="title"/>====
 <xsl:call-template name="include-file"/>
 ====
-      </xsl:when>
+
+</xsl:when>
 
       <!-- When example code contains callouts -->
       <xsl:when test="//co">
@@ -1448,10 +1452,11 @@ pass:[<xsl:copy-of select="."/>]
   <xsl:apply-templates select="*[not(self::title)]"/>
 </xsl:template>
 
-<!-- <xsl:template match="title">
-  <xsl:call-template name="process-id"/>
-  <xsl:apply-templates select="node()"/>
-</xsl:template> -->
+<xsl:template match="title">
+  <!-- <xsl:call-template name="process-id"/> -->
+  <xsl:value-of select="normalize-space(.)"/>
+  <!-- <xsl:apply-templates select="node()"/> -->
+</xsl:template>
 
 <!-- Utility functions/templates -->
 <xsl:function name="util:carriage-returns">
